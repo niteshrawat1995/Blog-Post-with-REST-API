@@ -1,0 +1,12 @@
+Admin:
+username: niteshrawat
+password: abtech123
+
+user2:
+username: testuser
+password: iamtest123
+
+user3:
+username: NewUser1
+password: iamtest123
+
