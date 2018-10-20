@@ -3,8 +3,8 @@ from django.urls import path
 
 
 urlpatterns = [
-    #/api/users/show/
-    path('show/', ProfileListAPIView.as_view(), name='users-list'),
-    #api/users/1/
-    path('<int:user>/', ProfileDetailAPIView.as_view(), name='users-detail'),
+    #/api/users/profile/show/
+    path('profile/show/', ProfileListAPIView.as_view(), name='users-list'),
+    #api/users/profile/1/show/
+    path('profile/<int:user>/show/', ProfileDetailAPIView.as_view(), name='users-detail'),
 ]

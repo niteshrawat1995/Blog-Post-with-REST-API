@@ -1,4 +1,4 @@
-from .api_views import (PostListAPIView, PostDetailAPIView,
+from .api_views import (PostListAPIView, PostDetailUpdateDeleteAPIView,
                         AuthorListAPIView, AuthorDetailAPIView
                         )
 
@@ -7,8 +7,8 @@ from django.urls import path
 urlpatterns = [
     # api/blog/posts/show/
     path('posts/show/', PostListAPIView.as_view()),
-    # api/blog/2/
-    path('<int:pk>/', PostDetailAPIView.as_view()),
+    # api/blog/posts/2/
+    path('posts/<int:pk>/show/', PostDetailUpdateDeleteAPIView.as_view()),
     # api/blog/authors/show/
     path('authors/show/', AuthorListAPIView.as_view()),
     # api/blog/authors/1/show/

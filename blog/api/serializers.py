@@ -21,7 +21,7 @@ class AuthorDetailSerializer(serializers.ModelSerializer):
         from django.contrib.auth.models import User
 
         model = User
-        fields = ['id', 'username', 'posts_count', 'posts', ]
+        fields = ['id', 'username', 'posts_count', 'posts']
 
     def get_posts_count(self, obj):
         return obj.posts.count()

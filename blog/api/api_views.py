@@ -12,7 +12,7 @@ class PostListAPIView(ListCreateAPIView):
     serializer_class = PostSerializer
 
 
-class PostDetailAPIView(RetrieveUpdateDestroyAPIView):
+class PostDetailUpdateDeleteAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
 
