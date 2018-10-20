@@ -9,6 +9,7 @@ from rest_framework.generics import (
     RetrieveAPIView,
 )
 
+from .permissions import IsAuthorOrReadOnly
 from rest_framework.permissions import (
     AllowAny,
     IsAuthenticated,
@@ -24,6 +25,7 @@ class PostCreateAPIView(CreateAPIView):
     '''
     queryset = Post
     serializer_class = PostSerializer
+    permission_classes = [IsAuthenticated]
 
     # Associate the current logged in user as the author of the post.
     def perform_create(self, serializer):
@@ -44,6 +46,7 @@ class PostDetailUpdateDeleteAPIView(RetrieveUpdateDestroyAPIView):
     '''
     queryset = Post.objects.all()
     serializer_class = PostSerializer
+    permission_classes = [IsAuthorOrReadOnly]
 
     # Associate the current user as the modifier of the post.
     def perform_update(self, serializer):
