@@ -1,0 +1,369 @@
+                        ## DJANGO PROJECT STRUCTURE ##
+
+Base level:
+manage.py - allow us to run command line commands.
+django_project -
+	__init__py - empty file
+	settings.py - 	settings and configurations.
+			         contains secret_key, debug =True,database settings etc..
+	urls.py	- setup the mapping of urls where we send the user.
+	wsgi.py - we application and web server communication file.
+
+RUN the server:
+Inside the same directory where the manage.py is present use command
+    (python manage.py runserver)
+
+# Django website is a collection various apps present inside the main projct.
+
+# To create an app:
+    python manage.py startapp app_name
+
+                              ## APP STRUCTURE ##
+
+views.py- contains the view of the pages of the app
+urls.py(manually crated) - setup the mapping for the views
+
+# Map the app urls.py with the project urls.py using:
+
+    from django.urls import path,include
+    urlspatterns = [path('app_name/',include('app_name.urls')),
+		]
+
+                                ## TEMPLATES ##
+
+Used to store the html structures. By default djago looks in the templates sub directory for each of our installed apps templates. So, needs to create a folder inside templates with app_name as well.
+
+# app_name -> templates -> app_names -> templates.html
+
+We need to add the blog application into the list of installed apps so that django knows to look for the templates sub directory.
+# from app_name apps.py copy the class name and create an entry in the project settings.py
+
+INSTALLED_APPS = ['app_name.apps.class name',]
+
+Now, instead of returning HttpResponse we can render the html pages using the render module:
+
+    from django.shortcuts import render
+    def home(request):
+        return render(request,'app_name/home.html')
+
+For Dynamic pages we need to pass objects to the page as well.
+Page templating is done using Jinja2 which is a template engine for python.
+Using templating, page is able to perform operations,looping,formatting to the object passed in render.
+
+# Syntax of jinja2 is:
+
+    {% for,if,extends,block... %} -> encloses various operation. Every operation require a closing block
+    {% endfor/endif/endblock %} -> closing code block
+    {{  }} -> encloses variables
+
+Static files like css and javascript needs to be located in static directory inside
+    the app.
+
+# Static file can be load into html file using:
+    {% load static %}
+
+## ADMIN PAGE: localhost:8000/admin ##
+
+Use to monitor and control the data for the project.
+Provides GUI for managing the users of the application.
+
+
+Create superuser for admin,in Terminal:
+    python manage.py createsuperuser
+#Error: no such table: auth_user
+
+First need to create the database for the project, this can be done using following data migration commands:
+    python manage.py makemigrations
+#No changes detected
+#to apply migrations:
+    python manage.py migrate
+
+                            ## DATABASE and MIGRATION ##
+
+Django has built-in ORM(Object Relation Mapper)
+ORM - it allows us to accces the DB in easy to use object-oriented way, also we can use diff DB without changing the code.
+
+Django ORM - represents DB structure as "Classes" which are known as "Models" and each row as an object. This is present in the app models.py file.
+
+In models.py, each class represents a table with members representing various attributes.
+After making changes to the models.py we need to again make the migrations from the terminal:
+    python manage,py makemigrations
+Outputs:
+Migrations for 'blog':
+  blog/migrations/0001_initial.py
+    - Create model Post
+
+We can view the SQL which is being used under the hood using:
+    python manage.py sqlmigrate blog 001
+
+Apply the created migration into database using:
+    python manage.py migrate
+
+                ## SQL commands in python shell ##
+
+Open python shell using:
+    python manage.py shell
+
+import the tables:
+    from blog.models import Post
+    from django.contrib.auth.models import User
+To see all the objects/tuples of table:
+    Post.objects.all()
+To see first obj:
+    Post.objects.first()
+To filter obj:
+    Post.objects.filter(username='niteshrawat')
+To assign obj with var:
+    post1 = Post.objects.first()
+Query on objs:
+    post1.title
+    post1.content
+To create new tuples:
+    newpost = Post(title='new post',content='new content',author='niteshrawat')
+
+* NOTE: Need to save the object in ordet to make changes to the DB using:
+    newpost.save()
+
+To create tuple in one table in reference with another.
+    user1 = User.objects.first()
+    post1 = Post(title='post1',content='content1',author_id= user.id)
+To see post of a single user using _set:
+    user.post_set.all()
+To create post inside a user:
+    user.post_set.create(title='blog3',content='third post')
+
+
+*NOTE: We use the post data from the DB by passing the Post.object.all() inside the views.py module:
+
+    context = {
+        'posts' = Post.objects.all()
+    }
+    return render(request,'blog/home.html',context)
+
+Register our Models(tables) into Admin page using admin.py module:
+    from .models import Post
+
+    admin.site.register(Post)
+
+                                ## USER REGISTRATION ##
+
+User registration page requires functionality independent from Blog application so we can create a new application called users.
+    python manage.py startapp users
+
+Add the new app into the INSTALLED_APP list present in the project's settings.py module:
+    INSTALLED_APP = ['users.apps.UsersConfig',]
+
+Create the view in the views.py module:
+    To create a inbuild form use:
+        from django.contrib.auth.forms import UserCreationForm
+    To create a custom form create a forms.py module which will extends UserCreationForm class:
+        form .forms import UserRegisterForm
+
+*NOTE: Handle both GET(normal request) and POST(form request) in the logic in views.py
+
+*NOTE: Map the users views.py into the project's urls.py module.
+
+Create register.html(which will be rendered by views.py) in:
+    users -> templates -> users -> register.html
+
+<register.html>
+    extends the base html calss from blog/base.html
+        {% extends "blog/base.html" %}
+    also load the crispy forms module:
+        {% load crispy_forms_tags %}
+    create a forms tag and add csrf (cross site request forgery) protection inside.
+        {% csrf_token %}
+    create a fieldset and add the form obj
+        {{ form|crispy }}
+## django-crispy-forms library -> helps make nice looking forms :)
+install the library using:
+    pip install django-crispy-forms
+Add crispy in the INSTALLED_APPS = ['crispy_forms',]
+# Telling crispy_forms which cssbootstrap to use.
+    CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
+
+                        ## LOGIN and LOGOUT views ##
+
+1. Django provides build-in login views inside "django.contrib.auth" module. Inside project urls.py:
+    from django.contrib.auth import views as auth_views
+
+# By default Django(login & logout views) looks for the template in "registration/login.html".
+But we can define the path to look for the templates by passing the path in template_name parameter inside LoginView & LogoutView patterns(in url.py).
+
+2. Set the URL pattern for login and logout route.
+    path('login/', auth_views.LoginView.as_view(template_name='users/login.html'), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(template_name='users/logout.html'), name='logout')
+
+3. Create login and logout templates.
+
+4. By default, on successful login django redirects the user to the "accounts/profile" route. But we can modify this by setting a variable in settings.py:
+    LOGIN_REDIRECT_URL = 'blog-home'
+
+                    ----------User Profile and Picture ----------
+
+Goal is make user be able to upload a profile picture.
+This can be done by extending the user models to add more fields and use django signals to run specific function on user action(event driven)
+
+1. Create a profile model inside user models.py having a user(1to1) and image.
+2. pip install pillow to able to work with images.
+3. runmigration and migrate commands to create migrations.py for the new models.py
+4. Register the model into user admin.py
+
+'''
+>>> from django.contrib.auth.models import User
+>>> user = User.objects.filter(username='niteshrawat').first()
+>>> user
+<User: niteshrawat>
+>>> user.profile
+<Profile: niteshrawat Profile>
+>>> user.profile.image
+<ImageFieldFile: profile_pics/my_pic.jpg>
+>>> user.profile.image.url
+'profile_pics/my_pic.jpg'
+'''
+5. Inside settings.py , set:
+    MEDIA_ROOT = 'os.path.join(BASE_DIR,'media')' -> uploaded files located into file system.
+    MEDIA_URL = '/media' -> files accessed in the URL
+
+6. Set MEDIA routes in URL patterns inside urls.py
+
+7. To make a new user have a profile with default picture we need to add django signals.
+
+Inside users app create signals.py
+Inside signals.py,
+-> import signal called "post_save"
+-> import a sender and a receiver
+-> import model (Profile) on which signal works
+
+-> create a functions to create and save a profile whenever a user is created.
+
+Special Import the users.signals inside user apps.py
+
+    ----------------- Update User Profile ------------------
+# User able to updte their profile name and image.
+
+1. We need to create a modelform which will work with a specific model(User)
+ Inside users forms.py create 1 form To work with username and password and 1 form To work with user image.
+
+2. Inside users view.py under profile function/view:
+    Instantiate the forms with submitted/post(request.POST) data and current data(request.user/user.profile).
+    And pass these forms objects as context
+
+3. To see the user and profile forms in the Profile page, Add them into the profile.html template.
+**NOTE: add enctype="multipart/form-data" attribute to form tag which enables it to work with image data.
+
+4. To resize the uploaded picture when it gets saved.
+    Inside the Profile model override the save() method of parent class and resize the image at the time of saving it into the DB.
+
+5. To add image of the user in the home page, just add an <img> tag with
+    src = {{ post.author.profile.image.url }}"
+
+--------------- Create,update and Delete Post (using class based Views) -----------
+
+Recap to views.py:
+Our url pattern are directed to certain views(class/func) which then handle the logic for the routes and render templates.
+
+Types of Class based views:
+i.)  ListView
+ii.) DetailView
+iii.)CreateView(includes a form)
+iv.) UpdateView(include a form)
+v.)  DeleteView
+
+Create class based view for home as PostListView(ListView) and update the blog urls.py with the new PostListView.as_view()
+    from django.views.generic import ListView
+
+**NOTE:
+By Default,
+-> Class based views(ListViews and DetailViews) looks for template with following naming pattern:
+    <app>/<model>_<viewtype>.html
+We can explicitly set the template name by adding the below variable inside our class based view(PostListView):
+    template_name = <path of the template>
+-> Class based view identify variables with name "objectlist". To change that we can set the value of :
+context_object_name= 'posts'
+
+To change the order of query out view is making to the the DB we can add and ordering attribute:
+    ordering = ['-date_posted'] -> newest to oldest.
+
+The url pattern for a PostDetailView must be like:
+    path('post/<int:pk>/', DetailListView.as_view(), name='post-detail')
+    where , <int:pk> -> <data_type:model_identifier>
+Create template "blog/post_detail.html" and use "object" as the name of the variable.
+
+iii.) PostCreateView(CreateView):
+
+-> CreateView creates a form whose fields can be defined in the "fields" attribute of the PostCreateView class.
+
+-> By default, CreateView looks for template <app/><model>_form.html
+
+-> To make sure user is logged in inorder to access this view:
+    Inherit "LoginRequiredMixin" to the far left.
+-> To tell django that the user who is creating the post is the author of the post:
+    Override the "form_valid(self,form)" method from CreateView and set the form.author = request.user
+-> Create a url route in urls.py
+
+iv.) PostUpdateView(UpdateView):
+
+-> UpdateView creates a form whose fields can be defined in the "fields" attribute of the PostUpdateView class.
+
+-> By default, CreateView looks for template <app/><model>_form.html
+-> Use "LoginRequiredMixin" to make sure user is logged in.
+-> Use "form_valid()" to assign current user as Author.
+-> To check, whether the current user is actually the author of the post which is being update, we need to override the tes_func(self) method from "UserPassesTestMixin" class. Undet tge test_func() we need to define our test condition i.e. self.request.user == post.author
+-> Create a url route in urls.py
+
+iv.) PostDeleteView(DeleteView):
+-> By default, DeleteView looks for template:
+    <app>/<model>_confirm_delete.html
+-> Add attribute:
+    success_url = '/'
+    To tell where to navigate after successfull deletion of the post.
+
+-> Use "LoginRequiredMixin" to make sure user is logged in.
+-> Use "UserPassesTestMixin" to make sure user is the author of the post.
+
+
+## Glueing views together by providing links:
+
+1. Inside base.html,
+Create a link for url 'post-create' under the Navbar.
+
+2. Inside post_detail.html,
+Create links for update and delete :
+    {% if object.author == user %}
+        'post-update' button
+        'post-delete' button
+    {% endif %}
+
+--------------------------- PAGINATION -----------------------------------------------
+
+-> Pagination helps preventing pulling too many post at once.
+-> Page of post by a specific user (also paginated).
+
+## PAGINATOR RUN down
+>>> from django.core.paginator import Paginator
+>>> posts =['1','2','3','4','5']
+>>> p = Paginator(posts,2)
+>>> p.num_pages
+3
+>>> for page in p.page_range:
+...     print(page)
+...
+1
+2
+3
+>>> p1 = p.page(1)
+>>> p1
+<Page 1 of 3>
+>>> p1.number
+1
+>>> p1.object_list
+['1', '2']
+>>> p1.has_previous()
+False
+>>> p1.has_next()
+True
+>>> p1.next_page_number()
+2
+##
