@@ -23,6 +23,11 @@ from django.conf.urls.static import static
 from blog.api import urls as blog_urls
 from users.api import urls as users_urls
 
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -32,10 +37,19 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(template_name='users/logout.html'), name='logout'),
     path('', include('blog.urls')),
     path('api/blog/', include(blog_urls)),
-    path('api/users/', include(users_urls))
+    path('api/users/', include(users_urls)),
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 # include() chops off whatever part of the url have been matched upto that point and sent the remaining string to the included urls module for further processing.
+
+'''
+curl -X POST -H "Content-Type: application/json" -d '{"username": "niteshrawat", "password": "abtech123"}' http://localhost:8000/api/token/
+  
+curl -H "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTU0MDIxNjYxNSwianRpIjoiYThjNjM0MWIyN2RjNDNiMTkyZTU1M2JkMWYzNzhhMjQiLCJ1c2VyX2lkIjoxfQ.4SJMSG3nbkkMmTI9_Y3itsGoj93Ryg2Rc-FM6dK_a8c","access":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNTQwMTMwNTE1LCJqdGkiOiI3MmY2M2NmMzQ3YjA0ODU1YThjYWI0OTk2YWFmYmI4OSIsInVzZXJfaWQiOjF9.rBWITgYKR52Zaemxs4dBuurwIxB7vLNF-" http://localhost:8000/api/blog/posts/create/  
+  
+'''
