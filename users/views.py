@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-#from django.contrib.auth.forms import UserCreationForm
+# from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm
@@ -13,7 +13,7 @@ def register(request):
             form.save()
             username = form.cleaned_data.get('username')
             # to show a flash message upon successfully creating a user.
-            messages.success(request, f'Your account has been created! You can now log in!')
+            messages.success(request, f'Your account has been created! You can now log in with {username}!')
             # redirect user to the home page using urlpattern defined for blog's view.home
             return redirect('login')
 

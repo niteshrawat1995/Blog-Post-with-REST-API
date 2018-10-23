@@ -1,8 +1,11 @@
 from django.db.models.signals import post_save
+
 # Importing sender
 from django.contrib.auth.models import User
+
 # Importing receiver
 from django.dispatch import receiver
+
 from .models import Profile
 
 
