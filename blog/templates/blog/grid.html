@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+{% load bootstrap_pagination %}
+
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <title>Grid</title>
+    <!--CSS starts here-->
+    <style>
+        table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        td, th {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #dddddd;
+        }
+    </style>
+    <!--CSS ends here-->
+</head>
+<body>
+
+<h2> Grid view for Post & Comment </h2>
+
+<!-- Grid starts here-->
+<table>
+    <tr>
+        <th>Post Multiselect</th>
+        <th>Post ID</th>
+        <th>Post Title</th>
+        <th>Post Date</th>
+        <th>Post Author</th>
+        <th>Post Comment</th>
+        <th>Edit Post</th>
+    </tr>
+    <form method="POST">
+        {% csrf_token %}
+
+    {% block content %}
+    {% for obj in object_list %}
+
+    <tr>
+        <td><input type="checkbox" name="checks" value="{{ obj.id }}"></td>
+        <td>{{ obj.id }}</td>
+        <td>{{ obj.title }}</td>
+        <td>{{ obj.date_posted }}</td>
+        <td>{{ obj.author }}</td>
+        <td>
+            {% if obj.comments.count > 1 %}
+                {% for comment in obj.comments.all %}
+                {{ comment.text }}
+                <br>
+                {% endfor %}
+            {% else %}
+                None
+            {% endif %}
+        </td>
+        <td><a href="#">Edit</a></td>
+    </tr>
+    {% endfor %}
+    {% endblock %}
+        <h2><input type="submit" name="delete" value="Delete selected" /></h2>
+    </form>
+</table>
+<!-- Grid ends here-->
+
+<br>
+Total number of posts : {{ total_count }}
+<br>
+<br>
+
+<!--Pagiantion starts here-->
+{% if is_paginated %}
+
+      {% if page_obj.has_previous %}
+        <a class ="btn btn-outline-info mb-4" href="?page=1">First</a>
+        <a class ="btn btn-outline-info mb-4" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+      {% endif %}
+
+      {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+          <a class ="btn btn-info mb-4" href="?page={{ num }}">{{ num }}</a>
+          {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+          <a class ="btn btn-outline-info mb-4" href="?page={{ num }}">{{ num }}</a>
+
+        {% endif %}
+      {% endfor %}
+
+      {% if page_obj.has_next %}
+        <a class ="btn btn-outline-info mb-4" href="?page={{ page_obj.next_page_number }}">Next</a>
+        <a class ="btn btn-outline-info mb-4" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+      {% endif %}
+
+{% endif %}
+<!--Pagiantion ends here-->
+
+</body>
+</html>

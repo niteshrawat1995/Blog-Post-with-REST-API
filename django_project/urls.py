@@ -22,6 +22,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from blog.api import urls as blog_urls
 from users.api import urls as users_urls
+from marketplace.views import create_state
 
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -40,6 +41,7 @@ urlpatterns = [
     path('api/users/', include(users_urls)),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('state/create/', create_state, name='ajax-form-state')
 ]
 
 if settings.DEBUG:

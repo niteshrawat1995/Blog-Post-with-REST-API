@@ -1,5 +1,19 @@
 from django.contrib import admin
 from .models import Profile
 
-# registring the profile model
-admin.site.register(Profile)
+
+class ProfileAdmin(admin.ModelAdmin):
+    list_display = ['user', 'image']
+    list_filter = ['user']
+    # inlines = [ProfileInline]
+    fieldsets = (
+        (
+            'User', {'fields': ('user', )}
+        ),
+        (
+            'Image', {'fields': ('image', )}
+        )
+    )
+
+
+admin.site.register(Profile, ProfileAdmin)

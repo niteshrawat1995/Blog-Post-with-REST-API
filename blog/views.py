@@ -9,7 +9,9 @@ from django.views.generic import (
     UpdateView,
     DeleteView
 )
-from .models import Post
+from django_filters.views import FilterView
+from .filters import ProductFilter
+from .models import Post, Comment
 
 
 def home(request):
@@ -88,5 +90,28 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
 
 def about(request):
-   # return HttpResponse('<h1>Blog About</h1>')
+    # return HttpResponse('<h1>Blog About</h1>')
     return render(request, 'blog/about.html', {'title': 'About'})
+
+
+class GridListView(ListView):
+    # filterset_class = ProductFilter
+    template_name = 'blog/grid.html'
+    paginate_by = 10
+
+    def get_queryset(self):
+        return Post.objects.all()
+
+    def post(self):
+        print('iam working!')
+        if self.request.POST.getlist('checks'):
+            Post.objects.filter(self.request.POST.getlist('checks')).delete()
+        return super(GridListView, self).post()
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super(GridListView, self).get_context_data(**kwargs)
+        # context['filter'] = ProductFilter(self.request.GET, queryset=self.get_queryset())
+        total_count = Post.objects.all().count()
+        context['total_count'] = total_count
+        context['comment_list'] = Comment.objects.all()
+        return context

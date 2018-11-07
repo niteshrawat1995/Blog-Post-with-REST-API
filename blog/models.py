@@ -21,3 +21,12 @@ class Post(models.Model):
     class Meta:
         verbose_name = _('Post')
         verbose_name_plural = _('Posts')
+
+
+class Comment(models.Model):
+    text = models.TextField()
+    post = models.ForeignKey(Post, related_name='comments', on_delete=models.PROTECT)
+
+    class Meta:
+        verbose_name = 'Comment'
+        verbose_name_plural = 'Comments'
