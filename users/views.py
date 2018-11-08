@@ -1,8 +1,10 @@
 from django.shortcuts import render, redirect
-# from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm
+from django.views.generic import CreateView
+from django.urls import reverse_lazy
+from django.contrib.messages.views import SuccessMessageMixin
 
 
 def register(request):
@@ -22,8 +24,16 @@ def register(request):
     return render(request, 'users/register.html', {'form': form})
 
 
+class RegisterCreateView(SuccessMessageMixin, CreateView):
+    template_name = 'users/register.html'
+    form_class = UserRegisterForm
+    success_url = reverse_lazy('login')
+    success_message = "Congrats %(first_name)s! Your account has been created! You can now login with brand new %(username)s!"
+
+
 @login_required
 def profile(request):
+    '''It's complex to handle 2 forms with classed based view so sticking to function based view.'''
     if request.method == 'POST':
         u_form = UserUpdateForm(request.POST, instance=request.user)
         p_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)

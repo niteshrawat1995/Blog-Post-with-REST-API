@@ -22,17 +22,16 @@ from django.conf import settings
 from django.conf.urls.static import static
 from blog.api import urls as blog_urls
 from users.api import urls as users_urls
-from marketplace.views import create_state
 
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
 
-
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('register/', user_views.register, name='register'),
+    path('register1/', user_views.RegisterCreateView.as_view(), name='register-class'),
     path('profile/', user_views.profile, name='profile'),
     path('login/', auth_views.LoginView.as_view(template_name='users/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(template_name='users/logout.html'), name='logout'),
@@ -41,7 +40,6 @@ urlpatterns = [
     path('api/users/', include(users_urls)),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('state/create/', create_state, name='ajax-form-state')
 ]
 
 if settings.DEBUG:

@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.models import User
+from django.db.models import Q
 # from django.http import HttpResponse
 from django.views.generic import (
     ListView,
@@ -9,17 +10,8 @@ from django.views.generic import (
     UpdateView,
     DeleteView
 )
-from django_filters.views import FilterView
-from .filters import ProductFilter
+from django.views.generic.edit import FormMixin
 from .models import Post, Comment
-
-
-def home(request):
-    # return HttpResponse('<h1>Blog Home</h1>')
-    context = {
-        'posts': Post.objects.all()
-    }
-    return render(request, 'blog/home.html', context)
 
 
 class PostListView(ListView):
@@ -28,6 +20,16 @@ class PostListView(ListView):
     context_object_name = 'posts'
     ordering = ['-date_posted']
     paginate_by = 5
+
+    def get_queryset(self):
+        query = self.request.GET.get('q')
+        if query:
+            query_set = self.model.objects.filter(Q(title__icontains=query) |
+                                                  Q(content__icontains=query)
+                                                  )
+            return query_set
+        else:
+            return super(PostListView, self).get_queryset()
 
 
 class UserPostListView(ListView):
@@ -38,8 +40,14 @@ class UserPostListView(ListView):
 
     # overriding to change the query set
     def get_queryset(self):
+        query = self.request.GET.get('q')
         user = get_object_or_404(User, username=self.kwargs.get('username'))
-        return Post.objects.filter(author=user).order_by('-date_posted')
+        if query:
+            query_set = self.model.objects.filter(Q(author=user),
+                                                  Q(title__icontains=query)| Q(content__icontains=query))
+            return query_set
+        else:
+            return self.model.objects.filter(author=user).order_by('-date_posted')
 
 
 class PostDetailView(DetailView):
