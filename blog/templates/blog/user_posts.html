@@ -1,7 +1,6 @@
 {% extends "blog/base.html" %}
+
 {% block content %}
-
-
 <h1 class="mb-3">Post by {{ view.kwargs.username }} ({{ page_obj.paginator.count }})</h1>
 <form method="GET" action="">
     <input type="text" name="q" placeholder="Search">
@@ -20,6 +19,7 @@
     </div>
 </article>
 {% endfor %}
+
 {% if is_paginated %}
 
 {% if page_obj.has_previous %}
