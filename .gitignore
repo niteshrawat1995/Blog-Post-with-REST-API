@@ -2,3 +2,4 @@ credentials.txt
 env/
 .idea
 .vscode
+*.pyc
